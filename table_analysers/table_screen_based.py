@@ -648,8 +648,13 @@ class TableScreenBased(Table):
 
             self.currentCallValue = 9999999.0
 
-        if self.currentBetValue < self.currentCallValue:
+        if self.currentBetValue < self.currentCallValue and not self.allInCallButton:
             self.currentCallValue = self.currentBetValue / 2
+            self.BetValueReadError = True
+            self.entireScreenPIL.save("pics/BetValueError.png")
+
+        if self.currentBetValue < self.currentCallValue and self.allInCallButton:
+            self.currentBetValue = self.currentCallValue + 0.01
             self.BetValueReadError = True
             self.entireScreenPIL.save("pics/BetValueError.png")
 
@@ -731,7 +736,12 @@ class TableScreenBased(Table):
         return True
 
     def get_game_number_on_screen(self, h):
-        func_dict = self.coo[inspect.stack()[0][3]][self.tbl]
+        try:
+            func_dict = self.coo[inspect.stack()[0][3]][self.tbl]
+        except KeyError:
+            h.game_number_on_screen = ''
+            return True
+
         pil_image = self.crop_image(self.entireScreenPIL, self.tlc[0] + func_dict['x1'], self.tlc[1] + func_dict['y1'],
                                     self.tlc[0] + func_dict['x2'], self.tlc[1] + func_dict['y2'])
         basewidth = 200
